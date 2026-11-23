@@ -7,6 +7,7 @@ import unittest
 from unittest.mock import patch
 
 from agentforge.isolation import run_probe
+from agentforge.trace import validate_record
 
 
 class AdmissionTests(unittest.TestCase):
@@ -74,6 +75,8 @@ class RealIsolationTests(unittest.TestCase):
         ):
             report = run_probe("boundaries")
         self.assertEqual(report["status"], "succeeded", report)
+        self.assertEqual(validate_record(report["record"]), report["record"])
+        self.assertTrue(report["record"]["capture"]["redacted"])
         self.assertTrue(report["host_canary_unchanged"])
         self.assertEqual(report["trace"], ["requested", "started", "succeeded"])
         checks = json.loads(report["output"].splitlines()[-1])["checks"]

@@ -14,3 +14,8 @@ The separate fixed-workload Linux probe starts bundled synthetic processes insid
 bubblewrap namespaces only; unsupported hosts fail closed. No arbitrary command
 API is provided. The host kernel/runtime remain trusted; memory limits, disk
 quotas and seccomp hardening are not implemented. See docs/execution-boundary.md.
+
+Use the isolation CLI's `--record-only` option for redacted trace export. Normal
+diagnostic reports still contain bounded raw output. Records omit raw output and
+host paths but hashes can identify known bytes. A validated record is an
+unauthenticated declaration; execution_attested remains false.

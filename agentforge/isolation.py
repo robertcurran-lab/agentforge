@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import os
@@ -17,12 +18,12 @@ import time
 from pathlib import Path
 from typing import Any
 
-SCENARIOS = frozenset({"smoke", "boundaries", "wait", "flood", "descendants"})
+from .trace import SCENARIOS, record_result
 
 
 def _capture(
     command: list[str], *, timeout: float, limit: int, cancel: threading.Event | None
-) -> tuple[str, int, str, bool]:
+) -> tuple[str, int, str, bool, int, str]:
     """Bound merged stdout/stderr and always reap the isolated process group."""
     process = subprocess.Popen(
         command,
@@ -71,10 +72,17 @@ def _capture(
         process.stdout.close()
     text = captured.decode("utf-8", errors="replace")
     started = text.startswith('{"event": "started"}\n')
-    return status, process.returncode, text, started
+    return (
+        status,
+        process.returncode,
+        text,
+        started,
+        len(captured),
+        hashlib.sha256(captured).hexdigest(),
+    )
 
 
-def run_probe(
+def _run_probe(
     scenario: str,
     *,
     timeout: float = 3,
@@ -163,7 +171,7 @@ def run_probe(
                 str(port),
             ]
             try:
-                status, code, output, started = _capture(
+                status, code, output, started, captured_bytes, output_sha256 = _capture(
                     command, timeout=timeout, limit=output_limit, cancel=cancel
                 )
             except OSError:
@@ -187,7 +195,8 @@ def run_probe(
             "started": started,
             "returncode": code,
             "output": output,
-            "captured_bytes": len(output.encode("utf-8")),
+            "captured_bytes": captured_bytes,
+            "output_sha256": output_sha256,
         }
         if scenario == "descendants" and started:
             # The detached fixed child would write this marker after one second.
@@ -199,6 +208,32 @@ def run_probe(
         return result
 
 
+def run_probe(
+    scenario: str,
+    *,
+    timeout: float = 3,
+    output_limit: int = 8192,
+    cancel: threading.Event | None = None,
+) -> dict[str, Any]:
+    """Run a fixed probe and attach a validated redacted observation record."""
+    probe_sha256 = hashlib.sha256(
+        Path(__file__).with_name("fixed_probe.py").read_bytes()
+    ).hexdigest()
+    started_ns = time.monotonic_ns()
+    result = _run_probe(
+        scenario, timeout=timeout, output_limit=output_limit, cancel=cancel
+    )
+    result["record"] = record_result(
+        result,
+        scenario=scenario,
+        timeout=timeout,
+        output_limit=output_limit,
+        elapsed_ns=time.monotonic_ns() - started_ns,
+        probe_sha256=probe_sha256,
+    )
+    return result
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -206,6 +241,11 @@ def main() -> int:
     )
     parser.add_argument("--timeout", type=float, default=3)
     parser.add_argument("--output-limit", type=int, default=8192)
+    parser.add_argument(
+        "--record-only",
+        action="store_true",
+        help="emit only redacted versioned trace metadata",
+    )
     args = parser.parse_args()
     try:
         result = run_probe(
@@ -214,7 +254,11 @@ def main() -> int:
     except (OSError, ValueError) as exc:
         print(f"probe failed: {exc}", file=sys.stderr)
         return 2
-    print(json.dumps(result, sort_keys=True, indent=2))
+    print(
+        json.dumps(
+            result["record"] if args.record_only else result, sort_keys=True, indent=2
+        )
+    )
     return 0 if result["status"] == "succeeded" else 3
 
 
