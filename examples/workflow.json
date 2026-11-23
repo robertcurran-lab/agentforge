@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "tasks": [
+    {
+      "name": "inspect",
+      "needs": [],
+      "capabilities": [
+        "repo.read"
+      ]
+    },
+    {
+      "name": "test",
+      "needs": [
+        "inspect"
+      ],
+      "capabilities": [
+        "tests.run"
+      ]
+    }
+  ]
+}
