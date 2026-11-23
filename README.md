@@ -3,7 +3,8 @@
 Inspectable software-engineering workflows with explicit capability decisions,
 owned by `robertcurran-lab`. The first CPU-compatible slice validates task graphs,
 state snapshots and symbolic allowlists, then explains admission decisions. It
-executes no commands, edits no code and provides no sandbox.
+preview executes no commands and edits no code. A separate fixed-workload Linux
+isolation probe is described below; no general agent runner is provided.
 
 ## Run and test
 
@@ -59,3 +60,12 @@ See [architecture](docs/architecture.md), [specification](docs/specification.jso
 MIT licensed. Original synthetic examples only; no private code is included.
 Prepared by Codex with the repository owner's authorization. Genuine independent
 review is still required; authenticated pushes are not independent human reviews.
+
+## Fixed-workload isolation investigation
+
+A Linux-only conformance probe is available via `python -m agentforge.isolation
+boundaries`. It runs only bundled synthetic workloads, not caller commands.
+Unsupported hosts deny execution without fallback; dedicated Linux CI requires
+real boundary tests. This is not a general-purpose agent runner or production
+sandbox. See [execution boundary](docs/execution-boundary.md) for enforced and
+unsupported restrictions, lifecycle, tests and platform requirements.
