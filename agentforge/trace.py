@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import math
 import re
+import sys
 from pathlib import Path
 from typing import Any
+
+from .record_files import _publish_bytes, _read_bytes
 
 SCENARIOS = frozenset({"smoke", "boundaries", "wait", "flood", "descendants"})
 TERMINALS = frozenset(
@@ -192,8 +196,7 @@ def _constant(value: str) -> None:
 
 def read_record(path: str | Path) -> dict[str, Any]:
     """Read one bounded strict UTF-8 record, not an executable instruction file."""
-    with open(path, "rb") as stream:
-        raw = stream.read(MAX_RECORD_BYTES + 1)
+    raw = _read_bytes(path, MAX_RECORD_BYTES)
     if len(raw) > MAX_RECORD_BYTES:
         raise ValueError("trace record exceeds 8 KiB")
     try:
@@ -203,3 +206,34 @@ def read_record(path: str | Path) -> dict[str, Any]:
     except RecursionError as exc:
         raise ValueError("trace nesting is too deep") from exc
     return validate_record(value)
+
+
+def write_record(path: str | Path, value: Any) -> None:
+    """Validate first, then publish a mode-0600 no-clobber complete record."""
+    record = validate_record(value)
+    payload = (
+        json.dumps(record, sort_keys=True, separators=(",", ":"), allow_nan=False)
+        + "\n"
+    ).encode("utf-8")
+    if len(payload) > MAX_RECORD_BYTES:
+        raise ValueError("trace record exceeds 8 KiB")
+    _publish_bytes(path, payload)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Validate one bounded redacted probe record"
+    )
+    parser.add_argument("record")
+    args = parser.parse_args()
+    try:
+        record = read_record(args.record)
+    except (OSError, ValueError) as exc:
+        print(f"trace validation failed: {exc}", file=sys.stderr)
+        return 2
+    print(json.dumps(record, sort_keys=True, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

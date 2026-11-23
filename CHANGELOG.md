@@ -7,3 +7,6 @@ process supervision and mandatory real namespace-conformance CI.
 
 Unreleased: strict version-1 redacted probe records, lifecycle/return-code
 validation, raw-byte output hashes, bundled-probe provenance and record-only CLI.
+
+Unreleased: opt-in atomic no-clobber private record persistence, symlink-safe
+bounded regular-file reads and a strict redacted record validation CLI.

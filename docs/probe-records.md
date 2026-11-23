@@ -55,3 +55,55 @@ inspection artifacts, not cryptographic attestations or permission grants.
 The existing fixed-workload, Linux-only and fail-closed restrictions remain. The
 mandatory Linux CI job exercises real isolation while validating generated records;
 unsupported local hosts test the denied path without claiming boundary coverage.
+
+## Opt-in local persistence and validation CLI
+
+```sh
+python -m agentforge.isolation smoke --record-only --record-output trace.json
+python -m agentforge.trace trace.json
+```
+
+The first command explicitly saves only the redacted record; `--record-only`
+also keeps stdout redacted. Without `--record-only`, the usual stdout report can
+still contain bounded raw diagnostics even though the saved file is redacted.
+A denied unsupported-host probe can save a valid denial record and still exits 3.
+Saving/validation errors exit 2 with no partial stdout. The probe runs before the
+save is attempted; an output conflict does not undo an already completed probe.
+No output file is written unless `--record-output` is supplied.
+
+`write_record(path, value)` validates and serializes the entire bounded record
+before filesystem mutation. Parents must already exist. The POSIX implementation
+opens each canonical parent component with no-follow directory descriptors,
+rejecting symlinks, dot/parent segments and empty components. Paths are not expanded
+or normalized through symlinks. Use a plain relative filename or a physical
+absolute path, not aliases such as macOS `/tmp` when it is a symlink. Unsupported
+platforms fail rather than falling back to weaker writes. Readers likewise refuse
+symlinks and nonregular files, including FIFOs without blocking.
+
+Within the selected parent directory, a random exclusive private staging file is
+created with mode 0600, fully written and fsynced. A same-directory hard link
+publishes it atomically without replacing an existing destination, followed by
+directory fsync and staging cleanup. No overwrite option exists. Existing files,
+symlinks and directories are conflicts; concurrent writers have at most one
+winner, whose complete valid record remains intact. The reader preserves its
+8 KiB bound and strict UTF-8/schema validation; the validation CLI prints only a
+fully validated redacted record, never a partial document.
+
+## Filesystem trust and durability limits
+
+This is for trusted local POSIX filesystems with hard-link, no-follow and fsync
+semantics, not network filesystems, adversarial directory owners or arbitrary
+hostile execution. Private file mode does not replace correct parent ownership.
+No directories, external files or preexisting records are deleted or replaced.
+Ordinary write/prepublication errors remove staging and leave no final output.
+After publication, an fsync or cleanup error can leave a complete valid final file;
+inspect and validate it before retrying rather than assuming an error means no
+file exists. Sudden process death can orphan a hidden mode-0600 staging file;
+the intended destination is never exposed partially. Such staging files are not
+published trace records; cleanup after an abrupt kill is an explicit operator task.
+Power-loss durability remains filesystem/hardware dependent, not an attestation.
+
+Tests exercise a real eight-writer race, injected short-write and fsync failures,
+a target appearing at publication, a real child exiting before publication,
+permissions, path/symlink/FIFO rejection, strict bounded validation, redaction and
+CLI roundtrips. Real Linux isolation CI remains mandatory and unchanged in scope.
