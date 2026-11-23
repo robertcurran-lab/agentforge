@@ -69,3 +69,11 @@ Unsupported hosts deny execution without fallback; dedicated Linux CI requires
 real boundary tests. This is not a general-purpose agent runner or production
 sandbox. See [execution boundary](docs/execution-boundary.md) for enforced and
 unsupported restrictions, lifecycle, tests and platform requirements.
+
+## Redacted probe records
+
+`python -m agentforge.isolation boundaries --record-only` emits a bounded,
+versioned lifecycle record with raw captured-byte SHA-256 and bundled-probe
+provenance. No stdout/stderr content, host paths or environment values are exported.
+`read_record` validates saved records; valid structure is not execution attestation.
+See [probe records](docs/probe-records.md) for schema, privacy and lifecycle rules.
