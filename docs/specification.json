@@ -1,0 +1,61 @@
+{
+  "name": "AgentForge",
+  "owner": "robertcurran-lab",
+  "proposed_repository": "robertcurran-lab/agentforge",
+  "mission": "Inspectable software-engineering workflows with capability-scoped execution.",
+  "status": "Initial implementation proposed on feature/capability-preview; independent review pending.",
+  "architecture": [
+    "Validated task/workflow state machine",
+    "Capability policy and approval records",
+    "Isolated execution adapter",
+    "Append-only execution traces",
+    "API and React dashboard after local execution contracts are proven"
+  ],
+  "functional_requirements": [
+    "Represent task dependencies and explicit terminal states",
+    "Deny undeclared tool capabilities by default",
+    "Record attempts, decisions, artifacts and failure classes",
+    "Bound execution time, output and retries",
+    "Support cancellation and replayable inspection without rerunning commands"
+  ],
+  "phases": [
+    "Offline task/policy validator",
+    "Sandbox adapter and subprocess isolation tests",
+    "Repository analysis and test workflow",
+    "API/dashboard",
+    "Model planning and measured recovery"
+  ],
+  "backlog": [
+    {
+      "id": "AF-01",
+      "title": "Validate workflows and deny undeclared capabilities",
+      "problem": "Agent tasks need enforceable execution boundaries before generated commands are allowed.",
+      "implementation": "Pure task schema, explicit capability allowlist, state transition validation and redacted trace schema; no command runner in initial slice.",
+      "acceptance": [
+        "Unknown capability or invalid transition fails closed",
+        "Trace cannot represent pending work as completed",
+        "Policy tests do not execute code or access network"
+      ],
+      "tests": [
+        "Deny default and conflicting capability cases",
+        "Cancellation, retry bounds and invalid state",
+        "Malformed planner output"
+      ],
+      "dependencies": [
+        "Approve repository creation",
+        "Review capability threat model"
+      ]
+    }
+  ],
+  "testing_strategy": [
+    "Policy/state-machine unit tests",
+    "OS isolation integration tests before any generated-code runner",
+    "Frontend component/E2E tests once UI exists"
+  ],
+  "release_criteria": [
+    "Execution boundary independently reviewed",
+    "Attack/timeout/cancellation tests pass",
+    "Dashboard reflects actual traces",
+    "No claim that policy validation alone is sandboxing"
+  ]
+}
