@@ -18,7 +18,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from .trace import SCENARIOS, record_result
+from .trace import SCENARIOS, record_result, write_record
 
 
 def _capture(
@@ -246,11 +246,16 @@ def main() -> int:
         action="store_true",
         help="emit only redacted versioned trace metadata",
     )
+    parser.add_argument(
+        "--record-output", help="publish a redacted record to a new no-clobber file"
+    )
     args = parser.parse_args()
     try:
         result = run_probe(
             args.scenario, timeout=args.timeout, output_limit=args.output_limit
         )
+        if args.record_output is not None:
+            write_record(args.record_output, result["record"])
     except (OSError, ValueError) as exc:
         print(f"probe failed: {exc}", file=sys.stderr)
         return 2

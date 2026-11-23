@@ -77,3 +77,9 @@ versioned lifecycle record with raw captured-byte SHA-256 and bundled-probe
 provenance. No stdout/stderr content, host paths or environment values are exported.
 `read_record` validates saved records; valid structure is not execution attestation.
 See [probe records](docs/probe-records.md) for schema, privacy and lifecycle rules.
+
+To save a record explicitly without replacing any existing path, add
+`--record-output trace.json`. Files are private, validated and atomically
+published. `python -m agentforge.trace trace.json` performs bounded strict
+validation. See the [persistence contract](docs/probe-records.md) for POSIX path,
+conflict and crash/durability limits.

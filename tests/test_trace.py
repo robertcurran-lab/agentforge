@@ -147,7 +147,7 @@ class TraceTests(unittest.TestCase):
 
     def test_strict_bounded_record_reader(self):
         with tempfile.TemporaryDirectory() as temp:
-            path = Path(temp) / "trace.json"
+            path = Path(temp).resolve() / "trace.json"
             row = self.record()
             path.write_text(json.dumps(row))
             self.assertEqual(read_record(path), row)

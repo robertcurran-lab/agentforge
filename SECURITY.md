@@ -19,3 +19,9 @@ Use the isolation CLI's `--record-only` option for redacted trace export. Normal
 diagnostic reports still contain bounded raw output. Records omit raw output and
 host paths but hashes can identify known bytes. A validated record is an
 unauthenticated declaration; execution_attested remains false.
+
+Opt-in record persistence validates before writing, rejects symlink components
+and nonregular read targets, uses mode-0600 staging and atomically links a complete
+new file without replacement. Trust parent-directory ownership and local POSIX
+filesystem semantics. A killed process may orphan private staging; post-publication
+sync errors may leave a complete valid output. No execution attestation is added.
