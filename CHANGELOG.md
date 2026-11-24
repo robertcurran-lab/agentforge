@@ -10,3 +10,6 @@ validation, raw-byte output hashes, bundled-probe provenance and record-only CLI
 
 Unreleased: opt-in atomic no-clobber private record persistence, symlink-safe
 bounded regular-file reads and a strict redacted record validation CLI.
+
+Unreleased: bounded deterministic trace aggregation, same-read source digest
+binding, duplicate rejection and redacted status/duration summary CLI.

@@ -83,3 +83,10 @@ To save a record explicitly without replacing any existing path, add
 published. `python -m agentforge.trace trace.json` performs bounded strict
 validation. See the [persistence contract](docs/probe-records.md) for POSIX path,
 conflict and crash/durability limits.
+
+## Inspect saved run histories
+
+`python -m agentforge.trace_summary first.json second.json` validates up to 100
+explicit redacted records and summarizes statuses, declared durations and capture
+bounds without paths or raw output. Duplicate records fail rather than inflate
+counts. Summaries are not execution attestations. See [trace summaries](docs/trace-summary.md).

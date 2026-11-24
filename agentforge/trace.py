@@ -194,8 +194,8 @@ def _constant(value: str) -> None:
     raise ValueError("non-finite JSON constant")
 
 
-def read_record(path: str | Path) -> dict[str, Any]:
-    """Read one bounded strict UTF-8 record, not an executable instruction file."""
+def read_record_snapshot(path: str | Path) -> tuple[dict[str, Any], str]:
+    """Validate and hash the same bounded byte snapshot, never rereading a path."""
     raw = _read_bytes(path, MAX_RECORD_BYTES)
     if len(raw) > MAX_RECORD_BYTES:
         raise ValueError("trace record exceeds 8 KiB")
@@ -205,7 +205,12 @@ def read_record(path: str | Path) -> dict[str, Any]:
         )
     except RecursionError as exc:
         raise ValueError("trace nesting is too deep") from exc
-    return validate_record(value)
+    return validate_record(value), hashlib.sha256(raw).hexdigest()
+
+
+def read_record(path: str | Path) -> dict[str, Any]:
+    """Read one bounded strict UTF-8 record, not an executable instruction file."""
+    return read_record_snapshot(path)[0]
 
 
 def write_record(path: str | Path, value: Any) -> None:
