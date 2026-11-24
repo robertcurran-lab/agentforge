@@ -25,3 +25,8 @@ and nonregular read targets, uses mode-0600 staging and atomically links a compl
 new file without replacement. Trust parent-directory ownership and local POSIX
 filesystem semantics. A killed process may orphan private staging; post-publication
 sync errors may leave a complete valid output. No execution attestation is added.
+
+Trace summaries read only an explicit bounded list of strict no-symlink regular
+files. Source hashes bind the same bytes parsed, not a signed execution identity
+or cross-file atomic snapshot. Summaries omit paths/raw payloads; their digests can
+still fingerprint known records. Durations are unauthenticated declarations.
