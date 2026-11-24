@@ -30,3 +30,9 @@ Trace summaries read only an explicit bounded list of strict no-symlink regular
 files. Source hashes bind the same bytes parsed, not a signed execution identity
 or cross-file atomic snapshot. Summaries omit paths/raw payloads; their digests can
 still fingerprint known records. Durations are unauthenticated declarations.
+
+The workspace read tool requires an explicit trusted repo.read grant before any
+open. Descriptor-anchored no-symlink traversal and a no-hardlink policy constrain
+path handling; .git and obvious credential names are excluded. Filename filters
+cannot guarantee secret-free content. Text export is opt-in and not scrubbed.
+Mutation checks do not make an atomic snapshot or protect against a malicious host.
