@@ -22,3 +22,6 @@ default, opt-in strict UTF-8, same-read provenance and ordinary mutation checks.
 
 - Fail the fixed boundary workload when any emitted boundary check is false, so
   normal probe and redacted-trace outcomes cannot label that workload succeeded.
+
+- Add bounded permission-gated workspace read batches with complete per-entry
+  outcomes, conservative aggregate growth-detection budget and strict redacted records.
