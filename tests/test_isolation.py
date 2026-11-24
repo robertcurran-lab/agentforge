@@ -1,11 +1,14 @@
+import io
 import json
 import os
 import subprocess
 import sys
 import threading
 import unittest
+from contextlib import redirect_stdout
 from unittest.mock import patch
 
+from agentforge.fixed_probe import main as fixed_probe_main
 from agentforge.isolation import run_probe
 from agentforge.trace import validate_record
 
@@ -57,6 +60,56 @@ class AdmissionTests(unittest.TestCase):
         self.assertEqual(result.returncode == 0, report["status"] == "succeeded")
         if sys.platform != "linux":
             self.assertEqual(report["status"], "denied")
+
+
+class FixedBoundaryOutcomeTests(unittest.TestCase):
+    def run_boundaries(self, allow_outside_read):
+        class SyntheticPath:
+            def __init__(self, value):
+                self.value = value
+
+            def read_text(self):
+                if self.value == "/synthetic-outside" and allow_outside_read:
+                    return "unexpected accessible content"
+                raise PermissionError("synthetic blocked operation")
+
+            def write_text(self, value):
+                if self.value == "/workspace/result":
+                    return len(value)
+                raise PermissionError("synthetic blocked operation")
+
+        output = io.StringIO()
+        with (
+            patch("agentforge.fixed_probe.Path", SyntheticPath),
+            patch(
+                "agentforge.fixed_probe.socket.create_connection",
+                side_effect=OSError("synthetic isolated network"),
+            ),
+            patch(
+                "agentforge.fixed_probe.sys.argv",
+                ["probe.py", "boundaries", "/synthetic-outside", "1234"],
+            ),
+            patch.dict(os.environ, {}, clear=True),
+            redirect_stdout(output),
+        ):
+            code = 0
+            try:
+                fixed_probe_main()
+            except SystemExit as exc:
+                code = exc.code
+        return code, json.loads(output.getvalue().splitlines()[-1])["checks"]
+
+    def test_failed_boundary_exits_nonzero_after_emitting_check_results(self):
+        code, checks = self.run_boundaries(allow_outside_read=True)
+        self.assertEqual(code, 1)
+        self.assertFalse(checks["read_outside_blocked"])
+        self.assertEqual(sum(not value for value in checks.values()), 1)
+
+    def test_all_successful_boundaries_exit_zero(self):
+        code, checks = self.run_boundaries(allow_outside_read=False)
+        self.assertEqual(code, 0)
+        self.assertEqual(len(checks), 7)
+        self.assertTrue(all(checks.values()))
 
 
 class RealIsolationTests(unittest.TestCase):

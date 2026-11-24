@@ -67,3 +67,9 @@ silently skipping. Tests attempt outside-file reads/writes, symlink escape, host
 cancellation and timeout. A detached fixed child would write a marker after one
 second; the timeout test verifies that marker never appears after teardown. This
 is a bounded conformance observation, not proof against all descendant strategies.
+
+The bundled boundary workload emits every check and exits nonzero if any check is
+false. The supervisor therefore reports a started workload failure, rather than
+success, for an observed boundary failure. Successful process completion alone is
+not a general isolation guarantee; the fixed checks remain limited conformance
+observations on the current host/runtime.
