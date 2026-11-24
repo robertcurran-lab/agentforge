@@ -36,3 +36,8 @@ open. Descriptor-anchored no-symlink traversal and a no-hardlink policy constrai
 path handling; .git and obvious credential names are excluded. Filename filters
 cannot guarantee secret-free content. Text export is opt-in and not scrubbed.
 Mutation checks do not make an atomic snapshot or protect against a malicious host.
+
+Workspace-read traces omit raw contents, paths and arbitrary failure messages.
+Hashes, byte counts and elapsed times may disclose information; keep records
+private. A persisted record does not attest runtime authenticity or make reads
+transactional with publication. See `docs/workspace-read-trace.md`.

@@ -16,3 +16,6 @@ binding, duplicate rejection and redacted status/duration summary CLI.
 
 Unreleased: explicitly capability-gated bounded workspace read, digest-only
 default, opt-in strict UTF-8, same-read provenance and ordinary mutation checks.
+
+- Add explicit private workspace-read tracing with a separate strict metadata-only
+  schema; preserve subprocess probe records and capability-gated source reading.
