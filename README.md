@@ -102,3 +102,7 @@ it is not an OS sandbox or secret detector. See [workspace read](docs/workspace-
 Record a capability-gated workspace read as private metadata with
 `python -m agentforge.read_trace --root /trusted/workspace README.md --allow repo.read --record /private/new.json`.
 See [workspace-read records](docs/workspace-read-trace.md) for redaction and failure semantics.
+
+Bounded [workspace read batches](docs/batch-workspace-read.md) compose up to16
+permission-gated snapshots under a conservative1 MiB payload-read reservation.
+Persisted records remain metadata-only and retain every entry's outcome.
