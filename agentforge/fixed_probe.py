@@ -41,6 +41,8 @@ def main() -> None:
         Path("/workspace/result").write_text("synthetic result")
         checks["workspace_writable"] = True
         print(json.dumps({"checks": checks}), flush=True)
+        if not all(checks.values()):
+            raise SystemExit(1)
     elif mode == "flood":
         while True:
             os.write(1, b"x" * 4096)

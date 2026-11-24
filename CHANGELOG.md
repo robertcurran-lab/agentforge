@@ -19,3 +19,6 @@ default, opt-in strict UTF-8, same-read provenance and ordinary mutation checks.
 
 - Add explicit private workspace-read tracing with a separate strict metadata-only
   schema; preserve subprocess probe records and capability-gated source reading.
+
+- Fail the fixed boundary workload when any emitted boundary check is false, so
+  normal probe and redacted-trace outcomes cannot label that workload succeeded.
