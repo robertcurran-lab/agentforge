@@ -90,3 +90,11 @@ conflict and crash/durability limits.
 explicit redacted records and summarizes statuses, declared durations and capture
 bounds without paths or raw output. Duplicate records fail rather than inflate
 counts. Summaries are not execution attestations. See [trace summaries](docs/trace-summary.md).
+
+## Explicit workspace read capability
+
+`python -m agentforge.workspace_read --root trusted-project source/example.py
+--allow repo.read` returns a bounded byte digest/count without source text or paths.
+`--include-text` explicitly exports strict UTF-8. This read-only tool rejects
+symlinks/hardlinks, control/obvious-secret names and ordinary detected mutation;
+it is not an OS sandbox or secret detector. See [workspace read](docs/workspace-read.md).
