@@ -106,3 +106,8 @@ See [workspace-read records](docs/workspace-read-trace.md) for redaction and fai
 Bounded [workspace read batches](docs/batch-workspace-read.md) compose up to16
 permission-gated snapshots under a conservative1 MiB payload-read reservation.
 Persisted records remain metadata-only and retain every entry's outcome.
+
+Summarize mixed saved redacted activities with
+`python -m agentforge.activity_summary RECORD [RECORD ...]`.
+[Activity-summary semantics](docs/activity-summary.md) keep probe, single-read and
+batch-entry counts distinct and preserve unavailable durations as null.

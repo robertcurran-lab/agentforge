@@ -25,3 +25,6 @@ default, opt-in strict UTF-8, same-read provenance and ordinary mutation checks.
 
 - Add bounded permission-gated workspace read batches with complete per-entry
   outcomes, conservative aggregate growth-detection budget and strict redacted records.
+
+- Add bounded read-only mixed activity summaries with strict existing schemas,
+  same-read/canonical digests, duplicate rejection and distinct per-kind accounting.
